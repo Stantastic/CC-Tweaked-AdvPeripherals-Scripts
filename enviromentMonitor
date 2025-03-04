@@ -10,6 +10,17 @@ if not monitor or not env or not ply then
     return
 end
 
+-- Configure UI/Term
+monitor.setTextScale(0.5)
+monitor.setPaletteColour(colors.green, 1/255* 0, 1/255* 240, 1/255* 120)
+monitor.setPaletteColour(colors.yellow, 1/255* 240, 1/255* 188, 1/255* 0)
+monitor.setPaletteColour(colors.red, 1/255* 255, 1/255* 77, 1/255* 77)
+monitor.setPaletteColour(colors.purple, 1/255* 134, 1/255* 0, 1/255* 232)
+monitor.setPaletteColour(colors.black, 1/255* 33, 1/255* 33, 1/255* 33)
+monitor.setPaletteColour(colors.gray, 1/255* 69, 1/255* 69, 1/255* 69)
+monitor.setPaletteColour(colors.lightGray, 1/255* 133, 1/255* 133, 1/255* 133)
+monitor.setPaletteColour(colors.white, 1/255* 178, 1/255* 178, 1/255* 178)
+
 -- Basalt UI Setup
 local ui = basalt.addMonitor()
     :setMonitor(monitor)
@@ -44,16 +55,16 @@ local function createLabel(text, color, yPos)
     ui:addLabel()
         :setText(text)
         :setFontSize(1)
-        :setSize("parent.w / 2 - 4", 1)
-        :setPosition(4, yPos)
+        :setSize("parent.w / 2 - 6", 1)
+        :setPosition(3, yPos)
         :setTextAlign("left")
         :setForeground(color)
 
     return ui:addLabel()
         :setText("loading...")
         :setFontSize(1)
-        :setSize("parent.w / 2 - 4", 1)
-        :setPosition(20, yPos)
+        :setSize("parent.w / 2 -2", 1)
+        :setPosition(19, yPos)
         :setTextAlign("right")
         :setForeground(color)
 end
