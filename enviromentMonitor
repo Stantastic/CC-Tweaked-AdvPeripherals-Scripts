@@ -1,0 +1,112 @@
+local basalt = require("basalt")
+
+-- Find Peripherals
+local monitor = peripheral.find("monitor")
+local env = peripheral.find("environmentDetector")
+local ply = peripheral.find("playerDetector")
+
+if not monitor or not env or not ply then
+    print("Missing peripherals! Ensure Monitor, Environment Detector, and Player Detector are connected.")
+    return
+end
+
+-- Basalt UI Setup
+local ui = basalt.addMonitor()
+    :setMonitor(monitor)
+    :setBackground(colors.black)
+
+ui:addLabel()
+    :setText("Environment Stats")
+    :setFontSize(1)
+    :setSize("parent.w", 1)
+    :setTextAlign("center")
+    :setBackground(colors.gray)
+    :setForeground(colors.red)
+
+-- Create Labels
+local timeLabel = ui:addLabel()
+    :setText("")
+    :setFontSize(1)
+    :setSize("parent.w", 1)
+    :setPosition(1, 3)
+    :setTextAlign("center")
+    :setForeground(colors.white)
+
+local dateLabel = ui:addLabel()
+    :setText("")
+    :setFontSize(1)
+    :setSize("parent.w", 1)
+    :setPosition(1, 4)
+    :setTextAlign("center")
+    :setForeground(colors.white)
+
+local function createLabel(text, color, yPos)
+    ui:addLabel()
+        :setText(text)
+        :setFontSize(1)
+        :setSize("parent.w / 2 - 4", 1)
+        :setPosition(4, yPos)
+        :setTextAlign("left")
+        :setForeground(color)
+
+    return ui:addLabel()
+        :setText("loading...")
+        :setFontSize(1)
+        :setSize("parent.w / 2 - 4", 1)
+        :setPosition(20, yPos)
+        :setTextAlign("right")
+        :setForeground(color)
+end
+
+local tpsData = createLabel("TPS:", colors.red, 6)
+local weatherData = createLabel("Weather:", colors.blue, 7)
+local playersData = createLabel("Players:", colors.purple, 8)
+local radiationData = createLabel("Radiation:", colors.green, 9)
+local moonData = createLabel("Moon Phase:", colors.yellow, 10)
+
+-- Function to update time & date
+local function updateTime()
+    while true do
+        timeLabel:setText(os.date("%H:%M:%S")) -- 24h format
+        dateLabel:setText(os.date("%A, %B %d %Y"))
+        sleep(1)
+    end
+end
+
+-- Function to update environment data
+local function updateEnvData()
+    while true do
+        local moon = env.getMoonName() or "Unknown"
+        local weather = env.isRaining() and "Raining" or "Clear"
+        local radiation = env.getRadiationRaw() or 0
+        local players = ply.getOnlinePlayers() or {}
+
+        moonData:setText(moon)
+        weatherData:setText(weather)
+        radiationData:setText(string.format("%.3f", radiation * 1e6) .. " mSv/h")
+        playersData:setText(#players)
+
+        sleep(5) -- Update every 5 seconds
+    end
+end
+
+-- Function to retrieve TPS
+local function updateTPS()
+    while true do
+        local startTime = os.epoch("utc")
+        sleep(1)
+        local elapsedTime = (os.epoch("utc") - startTime) / 1000
+        local tps = math.min(20, 20 / elapsedTime)
+
+        tpsData:setText(string.format("%.2f", tps))
+        sleep(5)
+    end
+end
+
+-- Run updates in parallel
+parallel.waitForAll(
+    function() basalt.autoUpdate() end,
+    updateTime,
+    updateTPS,
+    updateEnvData
+)
